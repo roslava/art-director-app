@@ -65,3 +65,44 @@ export const chrysoberylArtDirectionDecisions: ArtDirectionDecision[] = [
     confidence: { level: "needs-review", score: 0.5, rationale: "The faceted-material input is mock/sample content." },
   }),
 ];
+
+// These are mock/sample decisions for the second fixture, not authoritative facts about mookaite.
+export const mookaiteArtDirectionDecisions: ArtDirectionDecision[] = [
+  artDirectionDecisionSchema.parse({
+    id: "decision-mookaite-represent-pattern",
+    title: "Represent pattern and zoning",
+    inputResearchFactIds: ["fact-mookaite-pattern-zoning"],
+    selectedVisualGoalIds: ["show_pattern_or_zoning", "represent_color_accurately"],
+    selectedTechniqueIds: ["scientific_neutral", "soft_diffuse_light", "controlled_top_down", "deep_focus"],
+    rejectedTechniqueIds: ["hard_directional_light", "shallow_depth_of_field"],
+    reasoning: "Even neutral illumination and a controlled top-down view keep the sample pattern readable across the surface without directional shadow or selective focus concealing boundaries.",
+    expectedOutcome: "The viewer can compare broad pattern areas and restrained color variation without reading the image as a decorative abstract composition.",
+    risks: ["Oversaturated color.", "Decorative abstraction that loses material context.", "Directional shadows hiding pattern boundaries."],
+    confidence: { level: "needs-review", score: 0.5, rationale: "The pattern input is mock/sample content." },
+    notes: "This is a functional documentation choice, not a prescribed style for all mookaite subjects.",
+  }),
+  artDirectionDecisionSchema.parse({
+    id: "decision-mookaite-show-scale",
+    title: "Show collection scale and form",
+    inputResearchFactIds: ["fact-mookaite-collection-form"],
+    selectedVisualGoalIds: ["show_specimen_shape", "show_scale"],
+    selectedTechniqueIds: ["daylight_tabletop", "normal_50mm", "specimen_portrait", "scale_reference"],
+    rejectedTechniqueIds: ["extreme_macro"],
+    reasoning: "A normal perspective and restrained measured reference make the sample's overall form and size legible without turning a close detail into an ambiguous object.",
+    expectedOutcome: "The viewer understands the collection-scale object before interpreting its local pattern.",
+    risks: ["A decorative prop may imply incorrect scale.", "A tabletop setup may add unwanted reflected color."],
+    confidence: { level: "needs-review", score: 0.5, rationale: "The collection-form input is mock/sample content." },
+  }),
+  artDirectionDecisionSchema.parse({
+    id: "decision-mookaite-show-context",
+    title: "Show documentary context",
+    inputResearchFactIds: ["fact-mookaite-context"],
+    selectedVisualGoalIds: ["show_natural_context", "show_scale"],
+    selectedTechniqueIds: ["geological_field", "wide_environmental", "environmental_context"],
+    rejectedTechniqueIds: ["dark_studio"],
+    reasoning: "A wider environmental composition can show a relationship between the sample and its mock field setting while retaining a readable scale cue.",
+    expectedOutcome: "The viewer sees contextual information without confusing the setting for proof of provenance.",
+    risks: ["Distracting context.", "Unsupported provenance implication.", "Loss of specimen detail at a wide field of view."],
+    confidence: { level: "needs-review", score: 0.5, rationale: "The contextual input is mock/sample content." },
+  }),
+];

@@ -1,5 +1,6 @@
+import type { EvaluationCriterion, EvaluationResult } from "@/domain/evaluation";
 import type { ResearchReport } from "@/domain/research";
-import type { ArtDirectionDecision, GeneratedAsset, Review, Shot } from "@/domain/schemas";
+import type { ArtDirectionDecision, GeneratedAsset, Shot } from "@/domain/schemas";
 import type { AgentContext, AgentResult } from "./types";
 
 export interface CriticRequest {
@@ -8,9 +9,10 @@ export interface CriticRequest {
   generatedAssets: GeneratedAsset[];
   decisions: ArtDirectionDecision[];
   researchReport?: ResearchReport;
+  evaluationCriteria?: EvaluationCriterion[];
   reviewConstraints?: string[];
 }
 
 export interface CriticAgent {
-  critique(request: CriticRequest, context: AgentContext): Promise<AgentResult<Review[]>>;
+  critique(request: CriticRequest, context: AgentContext): Promise<AgentResult<EvaluationResult[]>>;
 }

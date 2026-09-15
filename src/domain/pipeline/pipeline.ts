@@ -73,13 +73,14 @@ export class AgentPipeline {
       agentReasoning,
       confidence,
       warnings,
-      approval: { status: "not-required", checkpoints: context.approvalCheckpoints ?? {} },
+      approval: { status: "not-required", checkpoints: context.approvalCheckpoints ?? {}, continuation: context.continuation },
+      continuation: context.continuation,
       executionMetadata: context.execution.metadata,
     };
   }
 
   private toStep<T>(agentName: string, inputSummary: string, outputSummary: string, result: AgentResult<T>, checkpoint?: PipelineApprovalCheckpoint): PipelineStep {
-    return { agentName, inputSummary, outputSummary, reasoning: result.reasoning, confidence: result.confidence, warnings: result.warnings, approvalRequired: requiresApproval(checkpoint), approval: checkpointApproval(checkpoint) ?? result.approval, resultMetadata: result.metadata };
+    return { agentName, inputSummary, outputSummary, reasoning: result.reasoning, confidence: result.confidence, warnings: result.warnings, approvalRequired: requiresApproval(checkpoint), approval: checkpointApproval(checkpoint) ?? result.approval, reviewReferences: [...new Set([...(checkpoint?.reviewRecordIds ?? []), ...(result.reviewReferences ?? [])])], resultMetadata: result.metadata };
   }
 
   private pendingResult(context: PipelineContext, checkpoint: PipelineCheckpoint, steps: PipelineStep[], outputs: PipelineRunResult["outputs"], agentReasoning: PipelineRunResult["agentReasoning"], confidence: PipelineRunResult["confidence"], warnings: string[]): PipelineRunResult {
@@ -92,7 +93,8 @@ export class AgentPipeline {
       agentReasoning,
       confidence,
       warnings,
-      approval: { status: "pending", pendingCheckpoint: checkpoint, checkpoints: context.approvalCheckpoints ?? {} },
+      approval: { status: "pending", pendingCheckpoint: checkpoint, checkpoints: context.approvalCheckpoints ?? {}, continuation: context.continuation },
+      continuation: context.continuation,
       executionMetadata: context.execution.metadata,
     };
   }

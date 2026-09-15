@@ -13,6 +13,7 @@ export interface AgentContext {
   instructions?: string[];
   constraints?: string[];
   approval?: AgentApproval;
+  reviewReferences?: string[];
   metadata?: Record<string, AgentMetadataValue>;
 }
 
@@ -35,5 +36,6 @@ export interface AgentResult<T> {
   confidence: AgentConfidence;
   warnings: string[];
   approval?: AgentApproval;
+  reviewReferences?: string[];
   metadata?: Record<string, AgentMetadataValue>;
 }

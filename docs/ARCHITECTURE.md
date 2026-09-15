@@ -40,6 +40,10 @@ Research Knowledge Model v1 adds structured `ResearchSource`, `ResearchClaim`, `
 
 Mock Agent Pipeline v1 lives in `src/domain/pipeline/`. It injects agents through the domain interfaces, passes a research report to the Art Director Agent and decisions to the Shot Planner Agent, and captures observable per-step results. Mock agents use only existing validated fixture data. The runtime can pause at optional approval checkpoints without coupling agents to UI, authentication, persistence, or a provider.
 
+Human Review Model v1 lives in `src/domain/review/`. `ReviewRecord` targets research, decisions, shots, or generated assets without mutating them; corrections retain old and proposed values with a reason. Agent and pipeline contracts can carry review references and continuation metadata so a future application layer can resume an approved workflow after persistence is introduced.
+
+Evaluation and Critic Model v1 lives in `src/domain/evaluation/`. It evaluates an asset against the visual intent encoded by linked decisions and shots: `Decision → Shot → Asset → Evaluation → Revision`. The Critic Agent returns structured `EvaluationResult` records with criterion scores, issues, confidence, and revision suggestions instead of a free-form critique.
+
 ## Application layers
 
 - `src/app`: App Router routes, metadata, and presentation.

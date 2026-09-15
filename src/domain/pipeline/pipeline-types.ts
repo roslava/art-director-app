@@ -8,6 +8,13 @@ export type PipelineCheckpoint = "research" | "decisions";
 export interface PipelineApprovalCheckpoint {
   approvalRequired: boolean;
   approval?: AgentApproval;
+  reviewRecordIds?: string[];
+}
+
+export interface PipelineContinuation {
+  previousExecutionId: string;
+  approvedCheckpoint: PipelineCheckpoint;
+  reviewRecordIds?: string[];
 }
 
 export interface PipelineExecutionMetadata {
@@ -22,6 +29,7 @@ export interface PipelineContext {
   project?: Pick<Project, "id" | "name" | "description">;
   execution: PipelineExecutionMetadata;
   approvalCheckpoints?: Partial<Record<PipelineCheckpoint, PipelineApprovalCheckpoint>>;
+  continuation?: PipelineContinuation;
 }
 
 export interface PipelineAgents {
@@ -44,6 +52,7 @@ export interface PipelineStep {
   warnings: string[];
   approvalRequired: boolean;
   approval?: AgentApproval;
+  reviewReferences?: string[];
   resultMetadata?: Record<string, AgentMetadataValue>;
 }
 
@@ -57,6 +66,7 @@ export interface PipelineApprovalState {
   status: string;
   pendingCheckpoint?: PipelineCheckpoint;
   checkpoints: Partial<Record<PipelineCheckpoint, PipelineApprovalCheckpoint>>;
+  continuation?: PipelineContinuation;
 }
 
 export interface PipelineRunResult {
@@ -69,5 +79,6 @@ export interface PipelineRunResult {
   confidence: Record<string, AgentConfidence>;
   warnings: string[];
   approval: PipelineApprovalState;
+  continuation?: PipelineContinuation;
   executionMetadata?: Record<string, AgentMetadataValue>;
 }
