@@ -10,6 +10,22 @@ Art Director is an AI-assisted workspace for planning, producing, reviewing, and
 
 A project groups subjects and export targets. Each subject has research and one or more shot plans. A shot plan contains explicit shots, each of which can produce generated assets. Reviews attach to generated assets. The model is defined in `src/domain/schemas.ts` and uses free-form `shotType` strings so shot types can be proposed per project instead of being constrained to mineral terminology.
 
+Production Knowledge Model v1 adds reusable `VisualGoal` and `ProductionTechnique` contracts. Decision Layer v1 makes the subject-specific rationale explicit:
+
+`FACT → ART DIRECTION DECISION → GOAL → METHOD → SHOT → IMAGE → CRITIQUE`
+
+`Research`
+
+`↓`
+
+`Decision Layer`
+
+`↓`
+
+`Shot Planning`
+
+Research facts remain subject-specific. An `ArtDirectionDecision` records why those facts warrant selected goals and techniques, along with rejected techniques, expected outcomes, risks, and confidence. Visual goals explain why an image is required; techniques are generic problem-solving methods grouped by flexible string categories such as lighting, optics, environment, composition, and capture. A Shot references the decision(s) that produced it as well as its research facts, goals, and techniques, while retaining its existing human-readable lighting, composition, background, camera, and prompt fields. It also has shot-level success criteria, risks, overrides, and production notes. The initial knowledge records live in `src/domain/knowledge/`; sample decisions live in `src/domain/decisions.ts`; all validate through the domain schemas.
+
 ## Application layers
 
 - `src/app`: App Router routes, metadata, and presentation.
@@ -34,3 +50,5 @@ AI output is untrusted input. Zod schemas provide a single runtime contract for 
 ## Facts versus art direction
 
 Research records observable or sourced facts, including confidence and source information. Art direction turns approved facts into decisions about framing, lighting, mood, and emphasis. Creative instructions may interpret facts, but must not overwrite them: visual risks from research remain constraints on the shot plan and critique process.
+
+Production knowledge sits between fact and shot: it does not assert that a subject always needs a given treatment. Instead it records reusable relationships, for example that raking side light can help reveal surface relief and can also exaggerate shadows. The Decision Layer applies those relationships to subject-specific facts without overwriting the facts themselves. Future selection services may create decisions from approved facts and visual goals, while the future Critic evaluates generated assets against the linked decisions and a Shot's success criteria and risks.

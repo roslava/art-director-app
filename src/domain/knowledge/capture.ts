@@ -1,0 +1,8 @@
+import { productionTechniqueSchema, type ProductionTechnique } from "@/domain/schemas";
+
+const capture = (id: string, title: string, description: string, solvesGoals: string[], usefulWhen: string[], avoidWhen: string[], strengths: string[], risks: string[], parameters: Record<string, unknown>, tags: string[]) => productionTechniqueSchema.parse({ id, category: "capture", title, description, solvesGoals, usefulWhen, avoidWhen, strengths, risks, parameters: { custom: {}, ...parameters }, tags });
+
+export const captureTechniques: ProductionTechnique[] = [
+  capture("deep_focus_capture", "Deep-focus capture", "A capture workflow prioritizing readable depth in one image.", ["show_specimen_shape", "show_pattern_or_zoning"], ["Multiple depth planes need to stay legible in a single exposure."], ["Selective focus is a deliberate communication tool."], ["Keeps relationships across depth visible."], ["May require more light, introduce diffraction, or flatten attention."], { depthOfField: "deep", custom: { captureApproach: "single deep-focus exposure" } }, ["capture", "focus"]),
+  capture("focus_stack_capture", "Focus-stack capture", "A multi-exposure workflow combining focus planes for close-up depth.", ["reveal_surface_relief", "show_crystal_geometry", "reveal_internal_inclusions"], ["Close-range depth exceeds what one exposure can render sharply."], ["Subject movement or changing light prevents reliable alignment."], ["Retains close detail across complex depth."], ["Alignment artifacts and unnatural uniform sharpness can misrepresent form."], { depthOfField: "stacked", custom: { captureApproach: "aligned multi-focus exposure" } }, ["capture", "focus", "computational"]),
+];
