@@ -44,20 +44,25 @@ Human Review Model v1 lives in `src/domain/review/`. `ReviewRecord` targets rese
 
 Evaluation and Critic Model v1 lives in `src/domain/evaluation/`. It evaluates an asset against the visual intent encoded by linked decisions and shots: `Decision → Shot → Asset → Evaluation → Revision`. The Critic Agent returns structured `EvaluationResult` records with criterion scores, issues, confidence, and revision suggestions instead of a free-form critique.
 
-Generation Model v1 lives in `src/domain/generation/`. It separates versioned prompts, generation requests, iterative attempts, and generated assets. The pipeline can optionally continue from `ShotPlan → Generation → Evaluation` through injected GeneratorAgent and CriticAgent contracts; provider choice and API calls remain outside the domain runtime.
+Generation Model v1 lives in `src/domain/generation/`. It separates versioned prompts, generation requests, iterative attempts, and generated assets. The pipeline can optionally continue from `ShotPlan → Generation → Evaluation` through injected GeneratorAgent and CriticAgent contracts.
+
+Provider Abstraction v1 lives in `src/domain/providers/`. Agents remain the reasoning and domain-transformation layer; providers are vendor-neutral execution contracts. A `ResearchAgent` may transform raw `ResearchProvider` output into a validated `ResearchReport`. A `GeneratorAgent` prepares a `GenerationRequest` and `PromptArtifact`, delegates execution to an `ImageProvider`, and maps its result into domain generation records. This creates an explicit boundary:
+
+`Domain Agent → Provider Layer → External System`
 
 ## Application layers
 
 - `src/app`: App Router routes, metadata, and presentation.
 - `src/domain`: Zod schemas, inferred TypeScript types, and mock data.
+- `src/domain/providers`: vendor-neutral image and research execution contracts plus offline mock implementations.
 - Future `src/services`: use cases such as research synthesis, prompt construction, generation, critique, and export coordination.
-- Future `src/providers`: adapters for AI and media-generation vendors.
+- Future provider adapters: external AI, research, and media-generation integrations that implement the domain provider contracts.
 
 The current page is server-rendered from local mock data. There is no database, auth flow, API route, or browser-side API integration.
 
-## Future AI provider abstraction
+## Provider boundary
 
-When generation is introduced, application services should depend on a small provider interface rather than a specific SDK. An OpenAI adapter can live behind that interface and read `OPENAI_API_KEY` only on the server. Provider payloads should be translated into domain-shaped data before being exposed to the UI.
+External-service payloads are not domain objects. Provider adapters return only raw research or image references with execution metadata; agents translate that data into domain-shaped records and validate it before it reaches a report, decision, shot, asset, or UI. This lets a future external, local, human-operated, or test provider be replaced without coupling the domain model to a vendor.
 
 ## Future persistence layer
 

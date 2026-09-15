@@ -6,13 +6,13 @@ Agent Architecture v1 defines domain contracts only. It does not select an AI pr
 
 Each agent receives a typed request plus an `AgentContext` and returns `Promise<AgentResult<T>>`. The agent contracts describe transformations between existing domain models:
 
-`ResearchAgent: subject + source candidates → ResearchReport`
+`ResearchAgent: subject + source candidates (+ optional raw provider input) → ResearchReport`
 
 `ArtDirectorAgent: ResearchReport + knowledge library → ArtDirectionDecision[]`
 
 `ShotPlannerAgent: decisions + knowledge library → ShotPlan`
 
-`GeneratorAgent: GenerationRequest → GenerationAttempt + PromptArtifact + GeneratedAsset`
+`GeneratorAgent: generation preparation → GenerationRequest + PromptArtifact → provider execution → GenerationAttempt + GeneratedAsset`
 
 `CriticAgent: shot + generated assets + decisions + criteria → EvaluationResult[]`
 
@@ -22,7 +22,7 @@ The request carries the inputs required for one transformation. It does not expo
 
 `ResearchAgent`, `ArtDirectorAgent`, `ShotPlannerAgent`, and `CriticAgent` are interfaces. Future implementations can include `OpenAIResearchAgent`, `ClaudeResearchAgent`, `HumanResearchAgent`, or `MockResearchAgent` without changing `ResearchReport`, decisions, shots, or reviews.
 
-An implementation belongs in a future service/provider layer. It can translate its provider payload into the domain output, validate that output with the existing Zod schemas, and then return the same `AgentResult<T>` required by the interface. Provider choice is therefore an implementation detail rather than a dependency of the domain model.
+An implementation may use a provider adapter from `src/domain/providers/`. A ResearchAgent transforms raw `ResearchProvider` output into a `ResearchReport`; a GeneratorAgent prepares domain request artifacts and delegates image execution to an `ImageProvider`. The agent validates mapped domain output with the existing Zod schemas before returning the same `AgentResult<T>` required by the interface. Provider choice is therefore an implementation detail rather than a dependency of the domain model.
 
 ## Reasoning metadata
 
