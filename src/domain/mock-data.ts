@@ -1,9 +1,42 @@
 import "@/domain/knowledge";
 import { chrysoberylArtDirectionDecisions } from "@/domain/decisions";
+import { researchReportSchema, type ResearchReport } from "@/domain/research";
 import { projectSchema, type Project, type Shot } from "@/domain/schemas";
 
 const now = "2026-09-15T09:00:00.000Z";
 const base = { shotPlanId: "plan-chrysoberyl", generatedAssets: [] };
+
+const chrysoberylResearchReport: ResearchReport = researchReportSchema.parse({
+  id: "report-chrysoberyl-sample",
+  subjectId: "subject-chrysoberyl",
+  summary: "Demonstration-only research report showing how source placeholders, claims, visual properties, opportunities, and risks remain separate from art-direction decisions. It is not authoritative mineral research.",
+  sources: [
+    { id: "source-mock-catalog-note", title: "Mock specimen observation note", type: "placeholder", url: "https://example.com/mock-specimen-note", citation: "Placeholder citation for architecture demonstration only.", reliability: "not verified", notes: "No scientific or catalog authority is claimed." },
+    { id: "source-mock-image-reference", title: "Mock image reference", type: "placeholder", url: "https://example.com/mock-image-reference", citation: "Placeholder visual-reference citation for architecture demonstration only.", reliability: "not verified", notes: "Used only to demonstrate source-to-claim linkage." },
+  ],
+  claims: [
+    { id: "fact-specimen-form", statement: "Mock/sample claim: the specimen has readable prismatic faces and an irregular natural outline.", category: "visual observation", confidence: { level: "needs-review", score: 0.5, rationale: "Demonstration-only claim with placeholder sources." }, sourceIds: ["source-mock-catalog-note"], tags: ["sample", "form"] },
+    { id: "fact-cluster-relationships", statement: "Mock/sample claim: multiple crystal forms and contact points are visually meaningful.", category: "visual observation", confidence: { level: "needs-review", score: 0.5, rationale: "Demonstration-only claim with placeholder sources." }, sourceIds: ["source-mock-image-reference"], tags: ["sample", "cluster"] },
+    { id: "fact-thin-edge-translucency", statement: "Mock/sample claim: thin or fractured areas may show limited light transmission while the bulk remains visually opaque or translucent.", category: "visual behavior", confidence: { level: "needs-review", score: 0.5, rationale: "Demonstration-only claim with placeholder sources." }, sourceIds: ["source-mock-image-reference"], tags: ["sample", "translucency"] },
+    { id: "fact-surface-structure", statement: "Mock/sample claim: face striations, joins, and natural texture are useful visual evidence.", category: "surface observation", confidence: { level: "needs-review", score: 0.5, rationale: "Demonstration-only claim with placeholder sources." }, sourceIds: ["source-mock-catalog-note"], tags: ["sample", "surface"] },
+    { id: "fact-faceted-geometry", statement: "Mock/sample claim: cut geometry and body color need to remain distinct from luxury-product styling.", category: "presentation constraint", confidence: { level: "needs-review", score: 0.5, rationale: "Demonstration-only claim with placeholder sources." }, sourceIds: ["source-mock-image-reference"], tags: ["sample", "faceted"] },
+  ],
+  visualProperties: [
+    { id: "property-prismatic-outline", name: "Prismatic outline", description: "Mock/sample visual property derived from the form claim; it describes what should be observable, not how it should be lit.", value: "readable irregular prismatic faces", importance: "high", relatedVisualGoalIds: ["show_specimen_shape", "show_crystal_geometry"] },
+    { id: "property-thin-edge-light-behavior", name: "Thin-edge light behavior", description: "Mock/sample property describing limited transmission at relevant edges.", value: "localized partial transmission", importance: "high", relatedVisualGoalIds: ["reveal_translucency"] },
+    { id: "property-surface-variation", name: "Surface variation", description: "Mock/sample property describing striations, joins, and texture as possible visible evidence.", value: ["striations", "joins", "natural texture"], importance: "medium", relatedVisualGoalIds: ["reveal_surface_relief", "show_crystal_geometry"] },
+  ],
+  opportunities: [
+    { id: "opportunity-edge-transmission", description: "Mock/sample opportunity: show a transition between a thin transmitting edge and a visually solid bulk.", basedOnClaimIds: ["fact-thin-edge-translucency"], suggestedGoalIds: ["reveal_translucency"] },
+    { id: "opportunity-geometry", description: "Mock/sample opportunity: make major faces and an irregular outline easy to follow.", basedOnClaimIds: ["fact-specimen-form", "fact-surface-structure"], suggestedGoalIds: ["show_crystal_geometry", "show_specimen_shape"] },
+  ],
+  risks: [
+    { id: "risk-false-transparency", description: "Mock/sample risk: the entire subject could appear glass-like.", reason: "A local thin-edge property could be overgeneralized by visual treatment.", relatedGoalIds: ["reveal_translucency"], avoidanceNotes: "Keep transmission limited to plausible thin or fractured areas and protect highlights." },
+    { id: "risk-exaggerated-relief", description: "Mock/sample risk: shadows may invent or exaggerate surface depth.", reason: "Directional light can make small texture changes appear more extreme.", relatedGoalIds: ["reveal_surface_relief", "show_crystal_geometry"], avoidanceNotes: "Use a restrained contrast level and compare the result with the source claim." },
+    { id: "risk-commercial-styling", description: "Mock/sample risk: a factual study may be read as luxury advertising.", reason: "Polished highlights and editorial staging can add unsupported commercial meaning.", relatedGoalIds: ["represent_color_accurately", "show_surface_luster"], avoidanceNotes: "Keep material evidence readable and avoid perfection-oriented styling cues." },
+  ],
+  overallConfidence: { level: "needs-review", score: 0.5, rationale: "All sources and claims are placeholders for model demonstration." },
+});
 
 type ShotReasoning = Pick<Shot, "researchFactIds" | "artDirectionDecisionIds" | "visualGoalIds" | "techniqueIds" | "successCriteria" | "risks" | "techniqueOverrides" | "productionNotes">;
 
@@ -30,6 +63,7 @@ export const samotsvetyProject: Project = projectSchema.parse({
         { id: "fact-faceted-geometry", label: "Sample faceted geometry", detail: "Mock/sample content: cut geometry and body color need to remain distinct from luxury-product styling.", confidence: "needs-review", source: "Mock/sample content — not authoritative research" },
       ], createdAt: now, updatedAt: now,
     },
+    researchReports: [chrysoberylResearchReport],
     artDirectionDecisions: chrysoberylArtDirectionDecisions,
     shotPlans: [{ id: "plan-chrysoberyl", subjectId: "subject-chrysoberyl", title: "Chrysoberyl catalog study", creativeDirection: "Quiet, precise specimen photography that makes material truth feel collectible.", createdAt: now, updatedAt: now, shots: [
       shot("shot-raw-crystal", "Raw crystal", "Establish the specimen’s natural form and scale.", "hero specimen portrait", "Large soft key from upper left with restrained fill.", "Centered vertical portrait with ample negative space.", "Museum-grade mineral catalog photograph of a single natural chrysoberyl crystal, upright on warm off-white seamless paper, yellow-green to honey tones, crisp prismatic faces and subtle surface striations, soft upper-left studio light, quiet negative space, highly factual material rendering.", "ready", { researchFactIds: ["fact-specimen-form"], artDirectionDecisionIds: ["decision-reveal-crystal-geometry"], visualGoalIds: ["show_specimen_shape", "show_crystal_geometry", "show_scale"], techniqueIds: ["scientific_neutral", "soft_diffuse_light", "specimen_portrait", "three_quarter_view", "normal_50mm", "scale_reference"], successCriteria: ["The full specimen silhouette and major planes are readable.", "A credible scale cue is available without dominating the portrait."], risks: ["A museum-like setup can look commercially isolated.", "A single angle can hide a meaningful face."], techniqueOverrides: [], productionNotes: "Use a restrained scale reference outside the primary hero crop if the export can support it." }),

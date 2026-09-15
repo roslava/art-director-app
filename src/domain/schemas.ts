@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { researchReportSchema, type ResearchReport } from "@/domain/research";
 
 const idSchema = z.string().min(1);
 const timestampSchema = z.string().datetime();
@@ -80,7 +81,7 @@ export const generatedAssetSchema = z.object({ id: idSchema, shotId: idSchema, p
 export const reviewSchema = z.object({ id: idSchema, generatedAssetId: idSchema, verdict: z.enum(["approved", "revise", "rejected"]), summary: z.string().min(1), strengths: z.array(z.string().min(1)), issues: z.array(z.string().min(1)), revisionDirection: z.string().min(1).optional(), createdAt: timestampSchema });
 export const shotSchema = z.object({ id: idSchema, shotPlanId: idSchema, title: z.string().min(1), purpose: z.string().min(1), shotType: z.string().min(1), subjectState: z.string().min(1), composition: z.string().min(1), lighting: z.string().min(1), background: z.string().min(1), cameraNotes: z.string().min(1), emphasize: z.array(z.string().min(1)), avoid: z.array(z.string().min(1)), generationPrompt: z.string().min(1), status: z.enum(["draft", "ready", "generating", "review", "approved"]), researchFactIds: z.array(idSchema).default([]), artDirectionDecisionIds: z.array(idSchema).default([]), visualGoalIds: z.array(idSchema).default([]), techniqueIds: z.array(idSchema).default([]), successCriteria: z.array(z.string().min(1)).default([]), risks: z.array(z.string().min(1)).default([]), techniqueOverrides: z.array(shotTechniqueOverrideSchema).default([]), productionNotes: z.string().min(1).optional(), generatedAssets: z.array(generatedAssetSchema).default([]) });
 export const shotPlanSchema = z.object({ id: idSchema, subjectId: idSchema, title: z.string().min(1), creativeDirection: z.string().min(1), shots: z.array(shotSchema), createdAt: timestampSchema, updatedAt: timestampSchema });
-export const subjectSchema = z.object({ id: idSchema, projectId: idSchema, name: z.string().min(1), description: z.string().min(1), research: researchSchema.optional(), artDirectionDecisions: z.array(artDirectionDecisionSchema).default([]), shotPlans: z.array(shotPlanSchema).default([]), createdAt: timestampSchema, updatedAt: timestampSchema });
+export const subjectSchema = z.object({ id: idSchema, projectId: idSchema, name: z.string().min(1), description: z.string().min(1), research: researchSchema.optional(), researchReports: z.array(researchReportSchema).default([]), artDirectionDecisions: z.array(artDirectionDecisionSchema).default([]), shotPlans: z.array(shotPlanSchema).default([]), createdAt: timestampSchema, updatedAt: timestampSchema });
 export const exportTargetSchema = z.object({ id: idSchema, projectId: idSchema, name: z.string().min(1), format: z.string().min(1), dimensions: z.string().min(1), colorSpace: z.string().min(1), status: z.enum(["draft", "ready", "exported"]) });
 export const projectSchema = z.object({ id: idSchema, name: z.string().min(1), description: z.string().min(1), subjects: z.array(subjectSchema).default([]), exportTargets: z.array(exportTargetSchema).default([]), createdAt: timestampSchema, updatedAt: timestampSchema });
 
@@ -92,6 +93,7 @@ export type ShotTechniqueOverride = z.infer<typeof shotTechniqueOverrideSchema>;
 export type ArtDirectionDecisionConfidence = z.infer<typeof artDirectionDecisionConfidenceSchema>;
 export type ArtDirectionDecision = z.infer<typeof artDirectionDecisionSchema>;
 export type Research = z.infer<typeof researchSchema>;
+export type { ResearchReport };
 export type GeneratedAsset = z.infer<typeof generatedAssetSchema>;
 export type Review = z.infer<typeof reviewSchema>;
 export type Shot = z.infer<typeof shotSchema>;

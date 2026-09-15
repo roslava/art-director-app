@@ -12,9 +12,9 @@ A project groups subjects and export targets. Each subject has research and one 
 
 Production Knowledge Model v1 adds reusable `VisualGoal` and `ProductionTechnique` contracts. Decision Layer v1 makes the subject-specific rationale explicit:
 
-`FACT → ART DIRECTION DECISION → GOAL → METHOD → SHOT → IMAGE → CRITIQUE`
+`SOURCE → CLAIM → RESEARCH REPORT → ART DIRECTION DECISION → GOAL → METHOD → SHOT → IMAGE → CRITIQUE`
 
-`Research`
+`Research Knowledge`
 
 `↓`
 
@@ -24,7 +24,7 @@ Production Knowledge Model v1 adds reusable `VisualGoal` and `ProductionTechniqu
 
 `Shot Planning`
 
-Research facts remain subject-specific. An `ArtDirectionDecision` records why those facts warrant selected goals and techniques, along with rejected techniques, expected outcomes, risks, and confidence. Visual goals explain why an image is required; techniques are generic problem-solving methods grouped by flexible string categories such as lighting, optics, environment, composition, and capture. A Shot references the decision(s) that produced it as well as its research facts, goals, and techniques, while retaining its existing human-readable lighting, composition, background, camera, and prompt fields. It also has shot-level success criteria, risks, overrides, and production notes. The initial knowledge records live in `src/domain/knowledge/`; sample decisions live in `src/domain/decisions.ts`; all validate through the domain schemas.
+Research Knowledge Model v1 adds structured `ResearchSource`, `ResearchClaim`, `VisualProperty`, `VisualOpportunity`, `VisualRisk`, and `ResearchReport` contracts in `src/domain/research/`. A Subject can hold multiple `researchReports`, separating traceable claims and observable properties from art-direction interpretation. An `ArtDirectionDecision` records why those facts warrant selected goals and techniques, along with rejected techniques, expected outcomes, risks, and confidence. Visual goals explain why an image is required; techniques are generic problem-solving methods grouped by flexible string categories such as lighting, optics, environment, composition, and capture. A Shot references the decision(s) that produced it as well as its research facts, goals, and techniques, while retaining its existing human-readable lighting, composition, background, camera, and prompt fields. It also has shot-level success criteria, risks, overrides, and production notes. The initial knowledge records live in `src/domain/knowledge/`; sample decisions live in `src/domain/decisions.ts`; all validate through the domain schemas.
 
 ## Application layers
 
