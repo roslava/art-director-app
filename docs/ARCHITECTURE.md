@@ -18,13 +18,27 @@ Production Knowledge Model v1 adds reusable `VisualGoal` and `ProductionTechniqu
 
 `↓`
 
+`Research Agent`
+
+`↓`
+
+`Research Report`
+
+`↓`
+
 `Decision Layer`
+
+`↓`
+
+`Shot Planner Agent`
 
 `↓`
 
 `Shot Planning`
 
 Research Knowledge Model v1 adds structured `ResearchSource`, `ResearchClaim`, `VisualProperty`, `VisualOpportunity`, `VisualRisk`, and `ResearchReport` contracts in `src/domain/research/`. A Subject can hold multiple `researchReports`, separating traceable claims and observable properties from art-direction interpretation. An `ArtDirectionDecision` records why those facts warrant selected goals and techniques, along with rejected techniques, expected outcomes, risks, and confidence. Visual goals explain why an image is required; techniques are generic problem-solving methods grouped by flexible string categories such as lighting, optics, environment, composition, and capture. A Shot references the decision(s) that produced it as well as its research facts, goals, and techniques, while retaining its existing human-readable lighting, composition, background, camera, and prompt fields. It also has shot-level success criteria, risks, overrides, and production notes. The initial knowledge records live in `src/domain/knowledge/`; sample decisions live in `src/domain/decisions.ts`; all validate through the domain schemas.
+
+Mock Agent Pipeline v1 lives in `src/domain/pipeline/`. It injects agents through the domain interfaces, passes a research report to the Art Director Agent and decisions to the Shot Planner Agent, and captures observable per-step results. Mock agents use only existing validated fixture data. The runtime can pause at optional approval checkpoints without coupling agents to UI, authentication, persistence, or a provider.
 
 ## Application layers
 
