@@ -1,6 +1,7 @@
 import type { EvaluationCriterion, EvaluationResult } from "@/domain/evaluation";
+import type { GeneratedAsset } from "@/domain/generation";
 import type { ResearchReport } from "@/domain/research";
-import type { ArtDirectionDecision, GeneratedAsset, Shot } from "@/domain/schemas";
+import type { ArtDirectionDecision, Shot } from "@/domain/schemas";
 import type { AgentContext, AgentResult } from "./types";
 
 export interface CriticRequest {

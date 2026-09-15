@@ -44,6 +44,8 @@ Human Review Model v1 lives in `src/domain/review/`. `ReviewRecord` targets rese
 
 Evaluation and Critic Model v1 lives in `src/domain/evaluation/`. It evaluates an asset against the visual intent encoded by linked decisions and shots: `Decision → Shot → Asset → Evaluation → Revision`. The Critic Agent returns structured `EvaluationResult` records with criterion scores, issues, confidence, and revision suggestions instead of a free-form critique.
 
+Generation Model v1 lives in `src/domain/generation/`. It separates versioned prompts, generation requests, iterative attempts, and generated assets. The pipeline can optionally continue from `ShotPlan → Generation → Evaluation` through injected GeneratorAgent and CriticAgent contracts; provider choice and API calls remain outside the domain runtime.
+
 ## Application layers
 
 - `src/app`: App Router routes, metadata, and presentation.

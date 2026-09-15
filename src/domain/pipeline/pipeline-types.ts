@@ -1,5 +1,7 @@
-import type { ArtDirectorAgent, ResearchAgent, ShotPlannerAgent } from "@/domain/agents";
+import type { ArtDirectorAgent, CriticAgent, GeneratorAgent, ResearchAgent, ShotPlannerAgent } from "@/domain/agents";
 import type { AgentApproval, AgentConfidence, AgentContext, AgentMetadataValue, AgentReasoning } from "@/domain/agents";
+import type { EvaluationCriterion, EvaluationResult } from "@/domain/evaluation";
+import type { GeneratedAsset, GenerationAttempt, GenerationRequest, PromptArtifact } from "@/domain/generation";
 import type { ResearchReport } from "@/domain/research";
 import type { ArtDirectionDecision, ProductionTechnique, Project, ShotPlan, Subject, VisualGoal } from "@/domain/schemas";
 
@@ -30,12 +32,18 @@ export interface PipelineContext {
   execution: PipelineExecutionMetadata;
   approvalCheckpoints?: Partial<Record<PipelineCheckpoint, PipelineApprovalCheckpoint>>;
   continuation?: PipelineContinuation;
+  generation?: {
+    requests: GenerationRequest[];
+    evaluationCriteria?: EvaluationCriterion[];
+  };
 }
 
 export interface PipelineAgents {
   research: { name: string; agent: ResearchAgent };
   artDirector: { name: string; agent: ArtDirectorAgent };
   shotPlanner: { name: string; agent: ShotPlannerAgent };
+  generator?: { name: string; agent: GeneratorAgent };
+  critic?: { name: string; agent: CriticAgent };
 }
 
 export interface PipelineKnowledge {
@@ -60,6 +68,13 @@ export interface PipelineOutputs {
   researchReport?: ResearchReport;
   decisions?: ArtDirectionDecision[];
   shotPlan?: ShotPlan;
+  generation?: {
+    requests: GenerationRequest[];
+    attempts: GenerationAttempt[];
+    promptArtifacts: PromptArtifact[];
+    assets: GeneratedAsset[];
+  };
+  evaluations?: EvaluationResult[];
 }
 
 export interface PipelineApprovalState {

@@ -12,6 +12,8 @@ Each agent receives a typed request plus an `AgentContext` and returns `Promise<
 
 `ShotPlannerAgent: decisions + knowledge library → ShotPlan`
 
+`GeneratorAgent: GenerationRequest → GenerationAttempt + PromptArtifact + GeneratedAsset`
+
 `CriticAgent: shot + generated assets + decisions + criteria → EvaluationResult[]`
 
 The request carries the inputs required for one transformation. It does not expose a database, HTTP client, SDK, API key, or provider-specific prompt type.

@@ -64,12 +64,78 @@ export class AgentPipeline {
     warnings.push(...shotPlanResult.warnings);
     agentReasoning.push({ agentName: shotPlanStep.agentName, reasoning: shotPlanStep.reasoning });
 
+    const outputs: PipelineRunResult["outputs"] = { researchReport: researchResult.data, decisions: decisionsResult.data, shotPlan: shotPlanResult.data };
+    if (this.agents.generator && context.generation?.requests.length) {
+      const generationRequests = context.generation.requests.filter((request) => shotPlanResult.data.shots.some((shot) => shot.id === request.shotId));
+      const generationResults = await Promise.all(generationRequests.map((request) => this.agents.generator?.agent.generate(request, context.agentContext)));
+      const completedGenerationResults = generationResults.filter((result): result is NonNullable<typeof result> => result !== undefined);
+      const generationWarnings = completedGenerationResults.flatMap((result) => result.warnings);
+      const generationStep: PipelineStep = {
+        agentName: this.agents.generator.name,
+        inputSummary: `${generationRequests.length} request(s) linked to the shot plan.`,
+        outputSummary: `${completedGenerationResults.length} mock/provider generation output(s).`,
+        reasoning: {
+          explanation: "Collected generation outputs after shot planning.",
+          assumptions: completedGenerationResults.flatMap((result) => result.reasoning.assumptions),
+          uncertainties: completedGenerationResults.flatMap((result) => result.reasoning.uncertainties),
+          evidenceIds: completedGenerationResults.flatMap((result) => result.reasoning.evidenceIds),
+        },
+        confidence: { level: "aggregated", rationale: "Generation confidence is retained per agent result through step metadata." },
+        warnings: generationWarnings,
+        approvalRequired: false,
+        reviewReferences: completedGenerationResults.flatMap((result) => result.reviewReferences ?? []),
+        resultMetadata: { generationRequestCount: generationRequests.length, generatedAssetCount: completedGenerationResults.length },
+      };
+      steps.push(generationStep);
+      confidence.generator = generationStep.confidence;
+      warnings.push(...generationWarnings);
+      agentReasoning.push({ agentName: generationStep.agentName, reasoning: generationStep.reasoning });
+      outputs.generation = {
+        requests: generationRequests,
+        attempts: completedGenerationResults.map((result) => result.data.attempt),
+        promptArtifacts: completedGenerationResults.map((result) => result.data.promptArtifact),
+        assets: completedGenerationResults.map((result) => result.data.asset),
+      };
+
+      if (this.agents.critic && outputs.generation.assets.length) {
+        const evaluationResults = await Promise.all(outputs.generation.assets.flatMap(async (asset) => {
+          const shot = shotPlanResult.data.shots.find((candidate) => candidate.id === asset.shotId);
+          if (!shot) return [];
+          const decisions = decisionsResult.data.filter((decision) => shot.artDirectionDecisionIds.includes(decision.id));
+          const result = await this.agents.critic?.agent.critique({ subjectId: context.subject.id, shot, generatedAssets: [asset], decisions, researchReport: researchResult.data, evaluationCriteria: context.generation?.evaluationCriteria }, context.agentContext);
+          return result ? [result] : [];
+        }));
+        const completedEvaluationResults = evaluationResults.flat();
+        const evaluationStep: PipelineStep = {
+          agentName: this.agents.critic.name,
+          inputSummary: `${outputs.generation.assets.length} generated asset(s) linked to planned shots.`,
+          outputSummary: `${completedEvaluationResults.flatMap((result) => result.data).length} evaluation result(s).`,
+          reasoning: {
+            explanation: "Collected structured evaluations after generation.",
+            assumptions: completedEvaluationResults.flatMap((result) => result.reasoning.assumptions),
+            uncertainties: completedEvaluationResults.flatMap((result) => result.reasoning.uncertainties),
+            evidenceIds: completedEvaluationResults.flatMap((result) => result.reasoning.evidenceIds),
+          },
+          confidence: { level: "aggregated", rationale: "Evaluation confidence is retained per agent result through step metadata." },
+          warnings: completedEvaluationResults.flatMap((result) => result.warnings),
+          approvalRequired: false,
+          reviewReferences: completedEvaluationResults.flatMap((result) => result.reviewReferences ?? []),
+          resultMetadata: { evaluatedAssetCount: outputs.generation.assets.length, evaluationCount: completedEvaluationResults.flatMap((result) => result.data).length },
+        };
+        steps.push(evaluationStep);
+        confidence.critic = evaluationStep.confidence;
+        warnings.push(...evaluationStep.warnings);
+        agentReasoning.push({ agentName: evaluationStep.agentName, reasoning: evaluationStep.reasoning });
+        outputs.evaluations = completedEvaluationResults.flatMap((result) => result.data);
+      }
+    }
+
     return {
       executionId: context.execution.id,
       subjectId: context.subject.id,
       status: "completed",
       steps,
-      outputs: { researchReport: researchResult.data, decisions: decisionsResult.data, shotPlan: shotPlanResult.data },
+      outputs,
       agentReasoning,
       confidence,
       warnings,
