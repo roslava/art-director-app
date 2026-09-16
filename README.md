@@ -21,6 +21,12 @@ Open `http://localhost:3000`.
 
 For future server-side AI work, copy `.env.example` to a local env file and set `OPENAI_API_KEY`. Never expose this value through a `NEXT_PUBLIC_` variable or browser code.
 
+To run the real OpenAI research demo, create `.env.local` and add your key, then run:
+
+```bash
+npm run research:openai -- Mookaite
+```
+
 ## Commands
 
 ```bash
