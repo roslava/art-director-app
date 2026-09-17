@@ -3,6 +3,7 @@ import { evaluationResultSchema, type EvaluationCriterion, type RevisionSuggesti
 import type { ResearchReport } from "@/domain/research";
 import type { ArtDirectionDecision, GeneratedAsset, Shot, Subject } from "@/domain/schemas";
 import { z } from "zod";
+import type { ArtDirectorPreset } from "@/domain/presets";
 
 const value = (input: unknown) => JSON.stringify(input);
 const confidence = (input: { level: string; score?: number; rationale?: string }) =>
@@ -15,17 +16,34 @@ function currentResearch(report: ResearchReport) {
     "Claims:",
     ...report.claims.map((claim) => `- [${claim.id}] ${claim.statement} (category: ${claim.category}; confidence: ${confidence(claim.confidence)}; source IDs: ${value(claim.sourceIds)}; tags: ${value(claim.tags)})`),
     "Visual properties:",
-    ...report.visualProperties.map((property) => `- [${property.id}] ${property.name}: ${property.description} (value: ${value(property.value)}; importance: ${property.importance}; related visual goal IDs: ${value(property.relatedVisualGoalIds)})`),
+    ...report.visualProperties.map((property) => `- [${property.id}] ${property.name}: ${property.description} (value: ${value(property.value)}; importance: ${property.importance}; confidence: ${property.confidence ? confidence(property.confidence) : "not specified"}; source IDs: ${value(property.sourceIds)}; related visual goal IDs: ${value(property.relatedVisualGoalIds)})`),
     "Opportunities:",
     ...report.opportunities.map((opportunity) => `- [${opportunity.id}] ${opportunity.description} (claim IDs: ${value(opportunity.basedOnClaimIds)}; suggested visual goal IDs: ${value(opportunity.suggestedGoalIds)})`),
     "Risks:",
     ...report.risks.map((risk) => `- [${risk.id}] ${risk.description} (reason: ${risk.reason}; related visual goal IDs: ${value(risk.relatedGoalIds)}${risk.avoidanceNotes ? `; avoidance: ${risk.avoidanceNotes}` : ""})`),
+    "Uncertainties:",
+    ...report.uncertainties.map((uncertainty) => `- [${uncertainty.id}] ${uncertainty.statement} (confidence: ${confidence(uncertainty.confidence)}; source IDs: ${value(uncertainty.sourceIds)})`),
     `Overall confidence: ${confidence(report.overallConfidence)}`,
   ].join("\n");
 }
 
 function subjectSection(subject: Subject) {
-  return ["SUBJECT", `ID: ${subject.id}`, `Name: ${subject.name}`, `Description: ${subject.description}`].join("\n");
+  return ["SUBJECT", `ID: ${subject.id}`, `Name: ${subject.name}`, subject.description ? `Description: ${subject.description}` : undefined].filter(Boolean).join("\n");
+}
+
+/** Manual-first brief: it requests factual visual research, never art-direction choices. */
+export function researchBrief(subject: Subject, preset?: ArtDirectorPreset) {
+  const methodology = preset ? ["PRESET", `Name: ${preset.name}`, `Version: ${preset.version}`, `Description: ${preset.description}`, "RESEARCH METHODOLOGY", `Include: ${preset.research.scope.include.join("; ")}`, `Exclude: ${preset.research.scope.exclude.join("; ")}`, ...preset.research.sections.flatMap((section) => [`${section.title}: ${section.description}`, ...section.questions.map((question) => `- ${question.question} (${question.applicability}; ${question.importance})`)])] : [];
+  return [
+    "RESEARCH REPORT MANUAL HANDOFF",
+    "Research the subject below for visual art direction. Report only physical, material, observable, and source-backed information. Do not choose composition, photographic style, mood, background, lens, framing, lighting setup, or shot design.",
+    subjectSection(subject),
+    ...methodology,
+    "OUTPUT CONTRACT",
+    "Return one raw JSON ResearchReport object. Do not wrap it in Markdown or add commentary.",
+    "Required fields: id, subjectId, summary, claims, visualProperties, opportunities, risks, uncertainties, sources, overallConfidence.",
+    `subjectId must be exactly \"${subject.id}\". Each claim has id, statement, category, confidence, sourceIds, tags. Each visual property has id, name, description, value, importance, confidence, sourceIds. Each uncertainty has id, statement, sourceIds, confidence. Every source ID in a claim, visual property, or uncertainty must occur in sources[].id.`,
+  ].join("\n\n");
 }
 
 function productionKnowledge() {
@@ -129,6 +147,51 @@ export function revisionBrief({ subject, report, decisions, shot, prompt, accept
     "SHOT PRODUCTION CONSTRAINTS",
     `Technique IDs: ${value(shot.techniqueIds)}\nTechnique overrides: ${value(shot.techniqueOverrides)}\nProduction notes: ${shot.productionNotes ?? "None"}`,
   ].join("\n\n");
+}
+
+function reviewConstraints(subject: Subject, report: ResearchReport | undefined, decisions: ArtDirectionDecision[], shot: Shot) {
+  const claims = report?.claims.filter((claim) => shot.researchFactIds.includes(claim.id)) ?? [];
+  const selected = selectedDecisions(shot, decisions);
+  return [
+    subjectSection(subject),
+    "SHOT GOAL",
+    `Title: ${shot.title}\nPurpose: ${shot.purpose}\nComposition: ${shot.composition}\nLighting: ${shot.lighting}\nBackground: ${shot.background}\nSuccess criteria: ${value(shot.successCriteria)}\nKnown risks: ${value(shot.risks)}`,
+    "SCIENTIFIC AND VISUAL CONSTRAINTS",
+    claims.length ? claims.map((claim) => `- ${claim.statement}`).join("\n") : "- Use the shot's stated intent and avoid unsupported material claims.",
+    selected.length ? selected.map((decision) => `- ${decision.expectedOutcome} Risks: ${value(decision.risks)}`).join("\n") : "- Keep the shot's stated production constraints.",
+  ];
+}
+
+/** A copy-ready prompt for a new version that deliberately uses the current result as its reference. */
+export function revisionPrompt({ subject, report, decisions, shot, currentPrompt, preserve, fix, categories }: {
+  subject: Subject; report?: ResearchReport; decisions: ArtDirectionDecision[]; shot: Shot; currentPrompt: string; preserve: string; fix: string; categories: string[];
+}) {
+  return [
+    "CREATE A NEW VERSION BASED ON THE CURRENT IMAGE",
+    "Use the current image as the visual reference. Do not overwrite it; create the next version of this shot.",
+    "ORIGINAL PROMPT", currentPrompt,
+    "PRESERVE", preserve,
+    "FIX", fix,
+    categories.length ? `FEEDBACK AREAS: ${categories.join(", ")}` : "",
+    ...reviewConstraints(subject, report, decisions, shot),
+    "Return one new image that retains the requested strengths while correcting the listed problems.",
+  ].filter(Boolean).join("\n\n");
+}
+
+/** A copy-ready replacement prompt that intentionally does not inherit visual directions from a rejected result. */
+export function regenerationPrompt({ subject, report, decisions, shot, currentPrompt, rejectionReasons, constraints, categories }: {
+  subject: Subject; report?: ResearchReport; decisions: ArtDirectionDecision[]; shot: Shot; currentPrompt: string; rejectionReasons: string; constraints: string; categories: string[];
+}) {
+  return [
+    "CREATE A NEW VERSION FROM THE SHOT BRIEF",
+    "The current image is rejected and must not be used as a visual basis. Create a replacement image for the next version of this shot.",
+    "ORIGINAL SHOT PROMPT", currentPrompt,
+    "WHY THE RESULT IS UNSUITABLE", rejectionReasons,
+    "ERRORS THAT MUST NOT RECUR", constraints,
+    categories.length ? `FEEDBACK AREAS: ${categories.join(", ")}` : "",
+    ...reviewConstraints(subject, report, decisions, shot),
+    "Do not preserve visual choices from the rejected image. Produce a new image that satisfies the brief and all listed constraints.",
+  ].filter(Boolean).join("\n\n");
 }
 
 export function criticBrief({ subject, report, decisions, shot, asset, prompt }: {

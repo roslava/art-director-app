@@ -7,7 +7,7 @@ import { projectSchema, type Project, type Shot } from "@/domain/schemas";
 const now = "2026-09-15T09:00:00.000Z";
 const base = { shotPlanId: "plan-chrysoberyl", generatedAssets: [] };
 
-const chrysoberylResearchReport: ResearchReport = researchReportSchema.parse({
+export const chrysoberylResearchReport: ResearchReport = researchReportSchema.parse({
   id: "report-chrysoberyl-sample",
   subjectId: "subject-chrysoberyl",
   summary: "Demonstration-only research report showing how source placeholders, claims, visual properties, opportunities, and risks remain separate from art-direction decisions. It is not authoritative mineral research.",
@@ -39,7 +39,7 @@ const chrysoberylResearchReport: ResearchReport = researchReportSchema.parse({
   overallConfidence: { level: "needs-review", score: 0.5, rationale: "All sources and claims are placeholders for model demonstration." },
 });
 
-const mookaiteResearchReport: ResearchReport = researchReportSchema.parse({
+export const mookaiteResearchReport: ResearchReport = researchReportSchema.parse({
   id: "report-mookaite-sample",
   subjectId: "subject-mookaite",
   summary: "Demonstration-only research report for a second subject. Its sources, claims, and visual implications are mock/sample content, not authoritative geological research.",
@@ -102,7 +102,7 @@ export const samotsvetyProject: Project = projectSchema.parse({
         { id: "fact-faceted-geometry", label: "Sample faceted geometry", detail: "Mock/sample content: cut geometry and body color need to remain distinct from luxury-product styling.", confidence: "needs-review", source: "Mock/sample content — not authoritative research" },
       ], createdAt: now, updatedAt: now,
     },
-    researchReports: [chrysoberylResearchReport],
+    researchReports: [],
     artDirectionDecisions: chrysoberylArtDirectionDecisions,
     shotPlans: [{ id: "plan-chrysoberyl", subjectId: "subject-chrysoberyl", title: "Chrysoberyl catalog study", creativeDirection: "Quiet, precise specimen photography that makes material truth feel collectible.", createdAt: now, updatedAt: now, shots: [
       shot("shot-raw-crystal", "Raw crystal", "Establish the specimen’s natural form and scale.", "hero specimen portrait", "Large soft key from upper left with restrained fill.", "Centered vertical portrait with ample negative space.", "Museum-grade mineral catalog photograph of a single natural chrysoberyl crystal, upright on warm off-white seamless paper, yellow-green to honey tones, crisp prismatic faces and subtle surface striations, soft upper-left studio light, quiet negative space, highly factual material rendering.", "ready", { researchFactIds: ["fact-specimen-form"], artDirectionDecisionIds: ["decision-reveal-crystal-geometry"], visualGoalIds: ["show_specimen_shape", "show_crystal_geometry", "show_scale"], techniqueIds: ["scientific_neutral", "soft_diffuse_light", "specimen_portrait", "three_quarter_view", "normal_50mm", "scale_reference"], successCriteria: ["The full specimen silhouette and major planes are readable.", "A credible scale cue is available without dominating the portrait."], risks: ["A museum-like setup can look commercially isolated.", "A single angle can hide a meaningful face."], techniqueOverrides: [], productionNotes: "Use a restrained scale reference outside the primary hero crop if the export can support it." }),
@@ -120,7 +120,7 @@ export const samotsvetyProject: Project = projectSchema.parse({
         { id: "fact-mookaite-context", label: "Sample documentary context", detail: "Mock/sample content: context may be useful when it is not read as provenance evidence.", confidence: "needs-review", source: "Mock/sample content — not authoritative research" },
       ], createdAt: now, updatedAt: now,
     },
-    researchReports: [mookaiteResearchReport],
+    researchReports: [],
     artDirectionDecisions: mookaiteArtDirectionDecisions,
     shotPlans: [{ id: "plan-mookaite", subjectId: "subject-mookaite", title: "Mookaite pattern and context study", creativeDirection: "A restrained, observational study that distinguishes broad pattern, collection scale, and documentary context.", createdAt: now, updatedAt: now, shots: [
       mookaiteShot("shot-mookaite-pattern", "Pattern survey", "Compare broad pattern areas and restrained color variation without making an abstract decorative image.", "pattern documentation", "Large soft diffuse light with neutral color control.", "Controlled top-down view with the pattern field filling most of the frame.", "Mock/sample material study of a mookaite collection object, broad red, ochre, and cream pattern areas under neutral diffuse illumination, controlled top-down view, deep readable focus, documentary color rendering, no decorative abstraction.", "ready", { researchFactIds: ["fact-mookaite-pattern-zoning"], artDirectionDecisionIds: ["decision-mookaite-represent-pattern"], visualGoalIds: ["show_pattern_or_zoning", "represent_color_accurately"], techniqueIds: ["scientific_neutral", "soft_diffuse_light", "controlled_top_down", "deep_focus"], successCriteria: ["Pattern boundaries remain readable across the frame.", "Color variation is restrained and not clipped or oversaturated."], risks: ["Warm color cast.", "Pattern appearing as an abstract decorative surface.", "Directional shadows hiding boundaries."], techniqueOverrides: [], productionNotes: "This is mock/sample pattern content, not a geological claim." }),

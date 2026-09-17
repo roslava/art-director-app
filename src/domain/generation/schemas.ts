@@ -25,6 +25,7 @@ export const generationAttemptSchema = z.object({
   generationRequestId: idSchema,
   attemptNumber: z.number().int().positive(),
   changesFromPrevious: z.string().min(1),
+  previousAttemptId: idSchema.optional(),
   createdAt: timestampSchema,
 });
 

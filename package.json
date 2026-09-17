@@ -7,6 +7,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx --test tests/**/*.test.ts",
     "research:openai": "NODE_OPTIONS=--conditions=react-server tsx scripts/openai-research-demo.ts"
   },
   "dependencies": {

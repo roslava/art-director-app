@@ -1,6 +1,6 @@
 # OpenAI Research v1
 
-This first real integration collects web-backed material for a visual art director. It focuses on subject appearance and production-relevant observations—such as colour, translucency, surface, pattern, reflectance, finish state, lighting changes, geological context when useful, and misleading depictions—rather than producing an encyclopedia entry. It does not add UI, persistence, image generation, or a new domain model.
+The OpenAI provider and CLI remain an optional future adapter. The browser workspace currently makes no OpenAI API calls: Research is manual-first and accepts only an imported, validated `ResearchReport`. If this adapter is enabled later, it must produce the same report contract without changing the manual flow.
 
 ## Boundary and validation
 

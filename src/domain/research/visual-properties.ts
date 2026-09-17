@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { researchConfidenceSchema } from "./research-claims";
 
 const idSchema = z.string().min(1);
 
@@ -15,6 +16,8 @@ export const visualPropertySchema = z.object({
   description: z.string().min(1),
   value: visualPropertyValueSchema,
   importance: z.string().min(1),
+  confidence: researchConfidenceSchema.optional(),
+  sourceIds: z.array(idSchema).default([]),
   relatedVisualGoalIds: z.array(idSchema).default([]),
 });
 
@@ -33,6 +36,14 @@ export const visualRiskSchema = z.object({
   avoidanceNotes: z.string().min(1).optional(),
 });
 
+export const researchUncertaintySchema = z.object({
+  id: idSchema,
+  statement: z.string().min(1),
+  sourceIds: z.array(idSchema).default([]),
+  confidence: researchConfidenceSchema,
+});
+
 export type VisualProperty = z.infer<typeof visualPropertySchema>;
 export type VisualOpportunity = z.infer<typeof visualOpportunitySchema>;
 export type VisualRisk = z.infer<typeof visualRiskSchema>;
+export type ResearchUncertainty = z.infer<typeof researchUncertaintySchema>;
